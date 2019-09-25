@@ -9,6 +9,10 @@ public class DisplayText {
     //EACH WORD/CHARACTER DIFFERENT QUALITIES
     //ALSO ALLOWS YOU TO GROUP TEXT BLOCKS BY TAGS/GROUPS FOR EASY REFERENCE LATER
     
+    //THERE IS A FUNCTION BELOW THAT USES THIS FUNCTION, BUT ALLOWS YOU TO WRITE IN THE COLOR/TEXT EFFECTS
+    //USING SHORTHAND
+    //IT'S CALLED ParseAndDisplayCertainText
+    
     /// <summary>
     /// (1) "goldy" is for the glowing golden color to be displayed on certain letters, "bluey" is for the glowing blue talent color to be displayed on certain letters (they are used to modulate color in a different script)
     /// (2) in extraColorToDisplay, put whatever you want, putting {2} at start of string will apply your chosen color to the second instance of that string if present, {3} is the 3rd, etc.
@@ -528,4 +532,186 @@ public class DisplayText {
             }
         }
     }
+    
+    /// <summary>
+    /// (1) Put colors in carats like this: <(bluey)>chocolate<>
+    /// (2) If you put a number (starting at 1) inside the first bracket, it will look for that number of the word in the string (only works with single digit numbers rn) (has to be before the parentheses for colors/before the w or s for effects)
+    /// (3) Put colors inside parentheses inside brackets (can combine with shake/wave), so <(bluey)wave>
+    /// (4) Same deal as colors for wave and shake, just put 'wave' or 'shake'
+    /// (5) List of colors to use: semiclear, red, blue, green, orange, pink, purple, silver, gray, yellow, brown, bluey, goldy (type them in correctly, or it wont work)
+    /// </summary>
+    public void ParseAndDisplayCertainText(string thingToParse, float textSiz, Vector3 absoPos, float widdy, AlignmentForText alignmenty, LayerNames layNameO, int layerOrdo, string tagerino, string grouperino)
+    {
+        //checking if string is valid
+        if (thingToParse != null && thingToParse != string.Empty)
+        {
+            //creating the variables we are going to pass in to the DisplayTextFunction below
+            string actualThingToShow = string.Empty;
+            List<TextColors> coleys = null;
+            List<string> coleyStrings = null;
+            List<bool> waveys = null;
+            List<string> waveyStrings = null;
+            bool currentlyColoring = false;
+            bool currentlyWaving = false;
+            bool checkingInside = false;
+            int numToUse = -1;
+            for (int i = 0; i < thingToParse.Length; i++)
+            {
+                if (checkingInside == false && (currentlyColoring == true || currentlyWaving == true))
+                {
+                    if (thingToParse[i] == '<') //ending our search for color/waving information
+                    {
+                        currentlyColoring = false;
+                        currentlyWaving = false;
+                        i += 2;
+                        if (i >= thingToParse.Length)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (checkingInside == false && currentlyColoring == true) //adding to our colors list
+                {
+                    coleyStrings[coleyStrings.Count - 1] += thingToParse[i];
+                }
+                if (checkingInside == false && currentlyWaving == true) //adding to our waving/shaking list
+                {
+                    waveyStrings[waveyStrings.Count - 1] += thingToParse[i];
+                }
+                if (checkingInside == false)
+                {
+                    if (thingToParse[i] == '<') //start our checking inside information
+                    {
+                        checkingInside = true;
+                    }
+                    else //adding characters to the string we will actually display on-screen (so that it doesn't show the shorthand in the final string)
+                    {
+                        actualThingToShow += thingToParse[i];
+                    }
+                }
+                else
+                {
+                    if (thingToParse[i] == '>') //end of checking for information
+                    {
+                        checkingInside = false;
+                        numToUse = -1;
+                    }
+                    else if (thingToParse[i] == '(')
+                    {
+                        //now we start parsing and looking for color information
+                        int counter = i + 1;
+                        string colorToUse = string.Empty;
+                        while (counter < thingToParse.Length)
+                        {
+                            if (thingToParse[counter] == ')')
+                            {
+                                i += (counter - i);
+                                counter = thingToParse.Length;
+                            }
+                            else
+                            {
+                                colorToUse += thingToParse[counter];
+                            }
+                            counter++;
+                        }
+                        if (coleys == null)
+                        {
+                            coleys = new List<TextColors>();
+                            coleyStrings = new List<string>();
+                        }
+                        counter = 0;
+                        while (counter <= (int)(TextColors.Bluey))
+                        {
+                            if ((((TextColors)(counter)).ToString()).ToLower() == colorToUse.ToLower())
+                            {
+                                coleys.Add((TextColors)(counter));
+                                counter = (int)(TextColors.Bluey) + 10;
+                            }
+                            counter++;
+                        }
+                        if (coleys.Count > coleyStrings.Count)
+                        {
+                            currentlyColoring = true;
+                            coleyStrings.Add(string.Empty);
+                            if (numToUse > 0)
+                            {
+                                coleyStrings[coleyStrings.Count - 1] += "{" + numToUse.ToString() + "}";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //now we start parsing and looking for waving/shaking information
+                        string parset = (thingToParse[i].ToString()).ToLower();
+                        if (parset == "w" || parset == "s")
+                        {
+                            if (waveys == null)
+                            {
+                                waveys = new List<bool>();
+                                waveyStrings = new List<string>();
+                            }
+                            if (parset == "w")
+                            {
+                                waveys.Add(true);
+                                i += 3;
+                            }
+                            else if (parset == "s")
+                            {
+                                waveys.Add(false);
+                                i += 4;
+                            }
+                            if (waveys.Count > waveyStrings.Count)
+                            {
+                                waveyStrings.Add(string.Empty);
+                                currentlyWaving = true;
+                                if (numToUse > 0)
+                                {
+                                    waveyStrings[waveyStrings.Count - 1] += "{" + numToUse.ToString() + "}";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //if the char is not 'w' or 's', that means it is an index of a string
+                            //so we should parse that index and store that information
+                            switch(thingToParse[i])
+                            {
+                                case '1':
+                                    numToUse = 1;
+                                    break;
+                                case '2':
+                                    numToUse = 2;
+                                    break;
+                                case '3':
+                                    numToUse = 3;
+                                    break;
+                                case '4':
+                                    numToUse = 4;
+                                    break;
+                                case '5':
+                                    numToUse = 5;
+                                    break;
+                                case '6':
+                                    numToUse = 6;
+                                    break;
+                                case '7':
+                                    numToUse = 7;
+                                    break;
+                                case '8':
+                                    numToUse = 8;
+                                    break;
+                                case '9':
+                                    numToUse = 9;
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            //now that we parsed the string and created the relevant information from the shorthand
+            //we can now call the actual DisplayText function to do all the dirty work
+            DisplayText(actualThingToShow, textSiz, absoPos, widdy, alignmenty, layNameO, layerOrdo, coleys, coleyStrings, waveys, waveyStrings, tagerino, grouperino);
+        }
+    }
+    
 }
