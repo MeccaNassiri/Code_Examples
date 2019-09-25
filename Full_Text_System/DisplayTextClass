@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DisplayText {
+public class DisplayText : MonoBehaviour {
     
     //THIS IS A FUNCTION FOR DISPLAYING TEXT IN THE GAME
     //IT RENDERS TEXT IN WORLD-SPACE AS A LIST OF OBJECTS, AND TAKES IN NUMEROUS ARGUMENTS TO GIVE
