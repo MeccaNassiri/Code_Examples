@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TextBlockProperties {
+public class TextBlockProperties : MonoBehaviour {
     
     //IN THE PROJECT, THIS FUNCTIONALITY IS PART OF THE SAME CLASS AS THE OTHER TEXT FUNCTIONALITY
     //HOWEVER, I HAVE MOVED IT FOR THE SAKE OF READABILITY
