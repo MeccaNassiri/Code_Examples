@@ -24,10 +24,10 @@ Shader "Custom/Mode7"
 			Tags
 			{
 			 "Queue"="Transparent" 
-             "IgnoreProjector"="True" 
-             "RenderType"="Transparent" 
-             "PreviewType"="Plane"
-             "CanUseSpriteAtlas"="True"
+             		 "IgnoreProjector"="True" 
+             		 "RenderType"="Transparent" 
+              		 "PreviewType"="Plane"
+              		 "CanUseSpriteAtlas"="True"
 			}
 
 			Cull Off
